@@ -1,4 +1,11 @@
 #define pinVibration 34
+
+enum State{
+  IDLE,
+  ALARM,
+  PAIRING
+};
+int currentState = IDLE;
 int timer = 0;
 int seconds = 5;
 
@@ -8,7 +15,17 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  switch(currentState)
+  {
+    case IDLE: 
+    detectVibration();
+    break;
+    case ALARM:
+    Serial.println("############## ALARM!!! ##############");
+    currentState = IDLE;
+    break;
+  }
+}
 
 void detectVibration()
 {
@@ -22,6 +39,7 @@ void detectVibration()
     timer++;
     if(timer == seconds)
     {
+      currentState = ALARM;
     }
   }
   timer = 0;
