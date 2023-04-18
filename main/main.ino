@@ -5,7 +5,7 @@
 #define PIN_BLUE_LED 33
 #define PIN_GREEN_LED 25
 
-enum State{
+enum State {
   IDLE,
   ALARM,
   PAIRING
@@ -19,19 +19,18 @@ void setup() {
   Serial.begin(9600);
   SerialBT.begin("VAN ALARM");
   pinMode(PIN_VIBRATION, INPUT);
-  pinMode(PIN_RED_LED, OUTPUT); // RED
-  pinMode(PIN_BLUE_LED, OUTPUT); // BLUE
-  pinMode(PIN_GREEN_LED, OUTPUT); // GREEN
+  pinMode(PIN_RED_LED, OUTPUT);    // RED
+  pinMode(PIN_BLUE_LED, OUTPUT);   // BLUE
+  pinMode(PIN_GREEN_LED, OUTPUT);  // GREEN
   digitalWrite(PIN_RED_LED, HIGH);
 }
 
 void loop() {
-  switch(currentState){
+  switch (currentState) {
     case IDLE:
       digitalWrite(PIN_RED_LED, LOW);
       digitalWrite(PIN_BLUE_LED, HIGH);
-      if (SerialBT.hasClient()) 
-      {
+      if (SerialBT.hasClient()) {
         currentState = PAIRING;
         digitalWrite(PIN_BLUE_LED, LOW);
         digitalWrite(PIN_GREEN_LED, HIGH);
@@ -47,50 +46,42 @@ void loop() {
       delay(1000);
       break;
     case PAIRING:
-      if (!SerialBT.hasClient()) 
-      {
+      if (!SerialBT.hasClient()) {
         currentState = IDLE;
         digitalWrite(PIN_GREEN_LED, LOW);
         digitalWrite(PIN_BLUE_LED, HIGH);
-      }
-      else
-      {
-      bluetoothSend();
-      bluetoothReceive(); 
-      detectVibration();
+      } else {
+        bluetoothSend();
+        bluetoothReceive();
+        detectVibration();
       }
       break;
   }
 }
 
-void detectVibration()
-{
+void detectVibration() {
   int value = analogRead(PIN_VIBRATION);
-  Serial.println(value);
-  while(value > 2000 && timer < seconds)
-  {
+  //Serial.println(value);
+  while (value > 2000 && timer < seconds) {
     delay(1000);
     value = analogRead(PIN_VIBRATION);
-    Serial.println(value);
+    //Serial.println(value);
     timer++;
   }
-  if(timer == seconds)
-  {
+  if (timer == seconds) {
     currentState = ALARM;
   }
   timer = 0;
 }
 
-void bluetoothSend()
-{
+void bluetoothSend() {
   char data[] = "Hello World\n";
   for (int i = 0; i < sizeof(data); i++) {
     SerialBT.write(data[i]);
   }
 }
 
-void bluetoothReceive()
-{
+void bluetoothReceive() {
   while (SerialBT.available() != 0) {
     char c = SerialBT.read();
     Serial.write(c);
