@@ -17,7 +17,7 @@ const int seconds = 5;
 
 void setup() {
   Serial.begin(9600);
-  SerialBT.begin();
+  SerialBT.begin("VAN ALARM");
   pinMode(PIN_VIBRATION, INPUT);
   pinMode(PIN_RED_LED, OUTPUT); // RED
   pinMode(PIN_BLUE_LED, OUTPUT); // BLUE
@@ -56,6 +56,7 @@ void loop() {
       else
       {
       bluetoothSend();
+      bluetoothReceive(); 
       detectVibration();
       }
       break;
@@ -85,5 +86,13 @@ void bluetoothSend()
   char data[] = "Hello World\n";
   for (int i = 0; i < sizeof(data); i++) {
     SerialBT.write(data[i]);
+  }
+}
+
+void bluetoothReceive()
+{
+  while (SerialBT.available() != 0) {
+    char c = SerialBT.read();
+    Serial.write(c);
   }
 }
