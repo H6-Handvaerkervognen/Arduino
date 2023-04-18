@@ -1,3 +1,4 @@
+#include <BluetoothSerial.h>
 
 #define PIN_VIBRATION 34
 
@@ -6,6 +7,7 @@ enum State{
   ALARM,
   PAIRING
 };
+BluetoothSerial SerialBT;
 int currentState = IDLE;
 int timer = 0;
 const int seconds = 5;
@@ -19,7 +21,11 @@ void setup() {
 void loop() {
   switch(currentState){
     case IDLE:
-      detectVibration();
+      if (SerialBT.hasClient()) 
+      {
+        bluetoothSend();
+        detectVibration();
+      }
       break;
     case ALARM:
       Serial.println("############## ALARM!!! ##############");
@@ -30,12 +36,12 @@ void loop() {
 
 void detectVibration()
 {
-  int value = analogRead(pinVibration);
+  int value = analogRead(PIN_VIBRATION);
   Serial.println(value);
   while(value > 2000 && timer < seconds)
   {
     delay(1000);
-    value = analogRead(pinVibration);
+    value = analogRead(PIN_VIBRATION);
     Serial.println(value);
     timer++;
   }
@@ -44,4 +50,12 @@ void detectVibration()
     currentState = ALARM;
   }
   timer = 0;
+}
+
+void bluetoothSend()
+{
+  char data[] = "Hello World\n";
+  for (int i = 0; i < sizeof(data); i++) {
+    SerialBT.write(data[i]);
+  }
 }
