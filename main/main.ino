@@ -23,13 +23,23 @@ void loop() {
     case IDLE:
       if (SerialBT.hasClient()) 
       {
-        bluetoothSend();
-        detectVibration();
+        currentState = PAIRING;
       }
       break;
     case ALARM:
       Serial.println("############## ALARM!!! ##############");
       currentState = IDLE;
+      break;
+    case PAIRING:
+      if (!SerialBT.hasClient()) 
+      {
+        currentState = IDLE;
+      }
+      else
+      {
+      bluetoothSend();
+      detectVibration();
+      }
       break;
   }
 }
