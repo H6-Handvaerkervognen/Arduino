@@ -1,5 +1,7 @@
 #include <BluetoothSerial.h>
+#include <ArduinoJson.h>  //6.21.0
 #include <WiFi.h>
+
 
 #define PIN_VIBRATION 34
 #define PIN_RED_LED 32
@@ -57,7 +59,6 @@ void loop() {
         digitalWrite(PIN_GREEN_LED, LOW);
         digitalWrite(PIN_BLUE_LED, HIGH);
       } else {
-        bluetoothSend();
         bluetoothReceive();
         detectVibration();
       }
@@ -81,7 +82,8 @@ void detectVibration() {
 }
 
 void bluetoothSend() {
-  char data[] = "Hello World\n";
+  delay(1000);
+  char data[] = "Hello World!";
   for (int i = 0; i < sizeof(data); i++) {
     SerialBT.write(data[i]);
   }
@@ -91,7 +93,12 @@ void bluetoothReceive() {
   while (SerialBT.available() != 0) {
     char c = SerialBT.read();
     Serial.write(c);
+     if(SerialBT.available() == 0)
+     {
+        bluetoothSendJsonEncode();
+     }
   }
+
 }
 void connectToWiFi() {
   if (WiFi.status() != WL_CONNECTED)
@@ -108,4 +115,9 @@ void connectToWiFi() {
   }
 }
 
+void bluetoothSendJsonEncode() {
+  StaticJsonDocument<200> doc;
+  doc["id"] = "123456789";
+  doc["name"] = "VAN ALARM";
+  serializeJson(doc, SerialBT);
 }
