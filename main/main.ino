@@ -28,10 +28,10 @@ void setup() {
   digitalWrite(PIN_RED_LED, HIGH);
 
   SerialBT.begin("VAN ALARM");
-  connectToWiFi();
 }
 
 void loop() {
+  connectToWiFi();
   switch (currentState) {
     case IDLE:
       digitalWrite(PIN_RED_LED, LOW);
@@ -94,12 +94,18 @@ void bluetoothReceive() {
   }
 }
 void connectToWiFi() {
-  WiFi.begin(SSID, PASSWORD);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    WiFi.begin(SSID, PASSWORD);
+    while (WiFi.status() != WL_CONNECTED)
+    {
+      delay(500);
+      Serial.print(".");
+    }
+    Serial.println("WiFi connected");
+    Serial.println("IP address: ");
+    Serial.println(WiFi.localIP());
   }
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
+}
+
 }
