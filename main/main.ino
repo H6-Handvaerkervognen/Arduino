@@ -8,6 +8,9 @@
 #define PIN_BLUE_LED 33
 #define PIN_GREEN_LED 25
 
+#define TONE_OUTPUT_PIN  21
+const int TONE_PWM_CHANNEL = 0; 
+
 #define SSID "ZBC-E-CH-SKP019 0986"
 #define PASSWORD "710%dK14"
 
@@ -21,15 +24,24 @@ int currentState = IDLE;
 int timer = 0;
 const int seconds = 5;
 
+int melody[] = {  // note frequency
+  262, 262, 262, 262, 262, 262, 262, 262
+};
+int noteDurations[] = {  
+  4, 8, 8, 4, 4, 8, 8, 4
+};
+
 void setup() {
   Serial.begin(115200);
   pinMode(PIN_VIBRATION, INPUT);
   pinMode(PIN_RED_LED, OUTPUT);    // RED
   pinMode(PIN_BLUE_LED, OUTPUT);   // BLUE
   pinMode(PIN_GREEN_LED, OUTPUT);  // GREEN
+  ledcAttachPin(TONE_OUTPUT_PIN, TONE_PWM_CHANNEL);
   digitalWrite(PIN_RED_LED, HIGH);
 
   SerialBT.begin("VAN ALARM");
+  buzzer();
 }
 
 void loop() {
@@ -120,4 +132,15 @@ void bluetoothSendJsonEncode() {
   doc["id"] = "123456789";
   doc["name"] = "VAN ALARM";
   serializeJson(doc, SerialBT);
+  bluetoothSend();
+}
+void buzzer()
+{
+  for (int thisNote = 0; thisNote < 8; thisNote++) {
+    int noteDuration = 1000 / noteDurations[thisNote];
+    ledcWriteTone(TONE_PWM_CHANNEL, melody[thisNote]);
+    delay(noteDuration);
+    ledcWriteTone(TONE_PWM_CHANNEL, 0);
+    delay(noteDuration);
+  }
 }
