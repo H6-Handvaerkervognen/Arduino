@@ -1,9 +1,13 @@
 #include <BluetoothSerial.h>
+#include <WiFi.h>
 
 #define PIN_VIBRATION 34
 #define PIN_RED_LED 32
 #define PIN_BLUE_LED 33
 #define PIN_GREEN_LED 25
+
+#define SSID "ZBC-E-CH-SKP019 0986"
+#define PASSWORD "710%dK14"
 
 enum State {
   IDLE,
@@ -16,13 +20,15 @@ int timer = 0;
 const int seconds = 5;
 
 void setup() {
-  Serial.begin(9600);
-  SerialBT.begin("VAN ALARM");
+  Serial.begin(115200);
   pinMode(PIN_VIBRATION, INPUT);
   pinMode(PIN_RED_LED, OUTPUT);    // RED
   pinMode(PIN_BLUE_LED, OUTPUT);   // BLUE
   pinMode(PIN_GREEN_LED, OUTPUT);  // GREEN
   digitalWrite(PIN_RED_LED, HIGH);
+
+  SerialBT.begin("VAN ALARM");
+  connectToWiFi();
 }
 
 void loop() {
@@ -86,4 +92,14 @@ void bluetoothReceive() {
     char c = SerialBT.read();
     Serial.write(c);
   }
+}
+void connectToWiFi() {
+  WiFi.begin(SSID, PASSWORD);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
 }
