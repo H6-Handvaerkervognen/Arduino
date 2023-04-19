@@ -9,7 +9,7 @@
 #define PIN_GREEN_LED 25
 
 #define TONE_OUTPUT_PIN  21
-const int TONE_PWM_CHANNEL = 0; 
+const int TONE_PWM_CHANNEL = 0;
 
 #define SSID "ZBC-E-CH-SKP019 0986"
 #define PASSWORD "710%dK14"
@@ -27,7 +27,7 @@ const int seconds = 5;
 int melody[] = {  // note frequency
   262, 262, 262, 262, 262, 262, 262, 262
 };
-int noteDurations[] = {  
+int noteDurations[] = {
   4, 8, 8, 4, 4, 8, 8, 4
 };
 
@@ -93,22 +93,16 @@ void detectVibration() {
   timer = 0;
 }
 
-void bluetoothSend() {
-  delay(1000);
-  char data[] = "Hello World!";
-  for (int i = 0; i < sizeof(data); i++) {
-    SerialBT.write(data[i]);
-  }
-}
+
 
 void bluetoothReceive() {
   while (SerialBT.available() != 0) {
     char c = SerialBT.read();
     Serial.write(c);
-     if(SerialBT.available() == 0)
-     {
-        bluetoothSendJsonEncode();
-     }
+    if (SerialBT.available() == 0)
+    {
+      bluetoothSendJsonEncode();
+    }
   }
 
 }
@@ -134,6 +128,14 @@ void bluetoothSendJsonEncode() {
   serializeJson(doc, SerialBT);
   bluetoothSend();
 }
+
+void bluetoothSend() {
+  char data[] = "!";
+  for (int i = 0; i < sizeof(data); i++) {
+    SerialBT.write(data[i]);
+  }
+}
+
 void buzzer()
 {
   for (int thisNote = 0; thisNote < 8; thisNote++) {
