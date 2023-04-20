@@ -53,7 +53,6 @@ void setup() {
   digitalWrite(PIN_RED_LED, HIGH);
 
   SerialBT.begin("VAN ALARM");
-  buzzer();
   connectToWiFi();
   configTime(3600, 3600, "pool.ntp.org", "time.nist.gov");
 }
@@ -73,12 +72,7 @@ void loop() {
 
       break;
     case ALARM:
-      Serial.println("############## ALARM!!! ##############");
-      currentState = IDLE;
-      digitalWrite(PIN_GREEN_LED, LOW);
-      digitalWrite(PIN_BLUE_LED, LOW);
-      digitalWrite(PIN_RED_LED, HIGH);
-      delay(1000);
+      detectionTimerRange();
       break;
     case PAIRING:
       if (!SerialBT.hasClient()) {
@@ -167,4 +161,18 @@ void getLocalTimeInfo(){
   }
   currentHour = timeinfo.tm_hour;
   currentMinute = timeinfo.tm_min;
+}
+
+void detectionTimerRange(){
+  if(currentHour >= startHour && currentHour <= endHour){ 
+    if(currentMinute >= startMinute && currentMinute <= endMinute){
+      Serial.println("############## ALARM!!! ##############");
+      //buzzer();
+      currentState = IDLE;
+      digitalWrite(PIN_GREEN_LED, LOW);
+      digitalWrite(PIN_BLUE_LED, LOW);
+      digitalWrite(PIN_RED_LED, HIGH);
+      delay(1000);
+    }
+  }
 }
