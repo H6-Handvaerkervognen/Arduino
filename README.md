@@ -1,10 +1,17 @@
 
-## Board package
 
-- ESP32-S https://dl.espressif.com/dl/package_esp32_index.json
+## Board package ESP32-S
+In the Arduino IDE under `File -> Perferences` in the `"Additional Board Manager URLs"` field add the following url
+
+	https://dl.espressif.com/dl/package_esp32_index.json
+
+Now under `Tools -> Board -> Boards Manager` search for `ESP32` and install the package 
 
 ## Libraries
--
+| Name | Url |
+|--|--|
+| ArduinoJson | https://arduinojson.org/ |
+
 
 ## Increase Memory 
 Open file path
