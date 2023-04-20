@@ -24,12 +24,24 @@ int currentState = IDLE;
 int timer = 0;
 const int seconds = 5;
 
+int startHour = 0;
+int startMinute = 0;
+int endHour = 23;
+int endMinute = 59;
+
+int currentHour = 0;
+int currentMinute = 0;
+
+
 int melody[] = {  // note frequency
   262, 262, 262, 262, 262, 262, 262, 262
 };
 int noteDurations[] = {
   4, 8, 8, 4, 4, 8, 8, 4
 };
+
+struct tm timeinfo;
+
 
 void setup() {
   Serial.begin(115200);
@@ -42,9 +54,12 @@ void setup() {
 
   SerialBT.begin("VAN ALARM");
   buzzer();
+  connectToWiFi();
+  configTime(3600, 3600, "pool.ntp.org", "time.nist.gov");
 }
 
 void loop() {
+  getLocalTimeInfo();
   connectToWiFi();
   switch (currentState) {
     case IDLE:
@@ -145,4 +160,11 @@ void buzzer()
     ledcWriteTone(TONE_PWM_CHANNEL, 0);
     delay(noteDuration);
   }
+void getLocalTimeInfo(){
+  if(!getLocalTime(&timeinfo)){
+    Serial.println("Failed to obtain time");
+    return;
+  }
+  currentHour = timeinfo.tm_hour;
+  currentMinute = timeinfo.tm_min;
 }
