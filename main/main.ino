@@ -147,6 +147,8 @@ void bluetoothSend() {
 
 void buzzer()
 {
+  for(int sec = 0; sec < 180; sec++)
+  {
   for (int thisNote = 0; thisNote < 8; thisNote++) {
     int noteDuration = 1000 / noteDurations[thisNote];
     ledcWriteTone(TONE_PWM_CHANNEL, melody[thisNote]);
@@ -154,6 +156,9 @@ void buzzer()
     ledcWriteTone(TONE_PWM_CHANNEL, 0);
     delay(noteDuration);
   }
+  }
+}
+
 void getLocalTimeInfo(){
   if(!getLocalTime(&timeinfo)){
     Serial.println("Failed to obtain time");
