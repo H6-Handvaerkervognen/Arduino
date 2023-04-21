@@ -149,26 +149,13 @@ void bluetoothSendJsonEncode() {
   doc["id"] = "123456789";
   doc["name"] = "VAN ALARM";
   serializeJson(doc, SerialBT);
-  bluetoothSend();
+  bluetoothSend("!");
 }
-
-void bluetoothSend() {
-  char data[] = "!";
-  for (int i = 0; i < sizeof(data); i++) {
-    SerialBT.write(data[i]);
-  }
-}
-
-void buzzer()
-{
-  for(int sec = 0; sec < 180; sec++)
+void bluetoothSend(char *data) {
+  if (data != NULL)
   {
-  for (int thisNote = 0; thisNote < 8; thisNote++) {
-    int noteDuration = 1000 / noteDurations[thisNote];
-    ledcWriteTone(TONE_PWM_CHANNEL, melody[thisNote]);
-    delay(noteDuration);
-    ledcWriteTone(TONE_PWM_CHANNEL, 0);
-    delay(noteDuration);
+    for (int i = 0; i < sizeof(data); i++) {
+      SerialBT.write(data[i]);
   }
   }
 }
