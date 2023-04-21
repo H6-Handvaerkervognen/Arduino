@@ -13,6 +13,7 @@ const int TONE_PWM_CHANNEL = 0;
 
 #define SSID "ZBC-E-CH-SKP019 0986"
 #define PASSWORD "710%dK14"
+#define DEVICE_PAIR_CODE "123456789"
 
 enum State {
   IDLE,
@@ -33,6 +34,7 @@ int currentHour = 0;
 int currentMinute = 0;
 
 bool alarmOn = false;
+bool devicePaired = false;
 
 int melody[] = {  // note frequency
   262, 262, 262, 262, 262, 262, 262, 262
@@ -106,15 +108,25 @@ void detectVibration() {
 
 
 void bluetoothReceive() {
+  char data[100];
+  int i = 0;
+
   while (SerialBT.available() != 0) {
     char c = SerialBT.read();
     Serial.write(c);
-    if (SerialBT.available() == 0)
-    {
+    data[i] = c;
+    i++;
+
+    if(i >= 100){
+      break;
+    }
+
+    if (SerialBT.available() == 0 && strstr(data, DEVICE_PAIR_CODE) != NULL && devicePaired == false) {
+      devicePaired = true;
       bluetoothSendJsonEncode();
+      i = 0;
     }
   }
-
 }
 void connectToWiFi() {
   if (WiFi.status() != WL_CONNECTED)
