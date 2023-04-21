@@ -20,6 +20,7 @@ enum State {
   ALARM,
   PAIRING
 };
+
 BluetoothSerial SerialBT;
 int currentState = IDLE;
 int timer = 0;
@@ -49,10 +50,10 @@ struct tm timeinfo;
 void setup() {
   Serial.begin(115200);
   pinMode(PIN_VIBRATION, INPUT);
-  pinMode(PIN_RED_LED, OUTPUT);    // RED
-  pinMode(PIN_BLUE_LED, OUTPUT);   // BLUE
-  pinMode(PIN_GREEN_LED, OUTPUT);  // GREEN
-  ledcAttachPin(TONE_OUTPUT_PIN, TONE_PWM_CHANNEL);
+  pinMode(PIN_RED_LED, OUTPUT);
+  pinMode(PIN_BLUE_LED, OUTPUT);
+  pinMode(PIN_GREEN_LED, OUTPUT);
+  ledcAttachPin(TONE_OUTPUT_PIN, TONE_PWM_CHANNEL); 
   digitalWrite(PIN_RED_LED, HIGH);
 
   SerialBT.begin("VAN ALARM");
@@ -192,8 +193,10 @@ void getLocalTimeInfo(){
     Serial.println("Failed to obtain time");
     return;
   }
-  currentHour = timeinfo.tm_hour;
-  currentMinute = timeinfo.tm_min;
+  else{
+    currentHour = timeinfo.tm_hour;
+    currentMinute = timeinfo.tm_min;
+  }
 }
 
 void detectionTimerRange(){
