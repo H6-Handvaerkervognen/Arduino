@@ -32,6 +32,7 @@ int endMinute = 59;
 int currentHour = 0;
 int currentMinute = 0;
 
+bool alarmOn = false;
 
 int melody[] = {  // note frequency
   262, 262, 262, 262, 262, 262, 262, 262
@@ -159,6 +160,21 @@ void buzzer()
   }
 }
 
+void buzzer(int duration_ms) {
+  int start_time = millis();
+  while (millis() - start_time < duration_ms) {
+    for (int i = 0; i < 8; i++) {
+      int noteDuration = 1000 / noteDurations[i];
+      ledcWriteTone(TONE_PWM_CHANNEL, melody[i]);
+      delay(noteDuration);
+      ledcWriteTone(TONE_PWM_CHANNEL, 0);
+      delay(noteDuration);
+    }
+    if(alarmOn == false){
+      start_time = millis() + duration_ms;
+    }
+  }
+}
 void getLocalTimeInfo(){
   if(!getLocalTime(&timeinfo)){
     Serial.println("Failed to obtain time");
