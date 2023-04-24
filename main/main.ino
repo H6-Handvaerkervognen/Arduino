@@ -90,7 +90,10 @@ void loop() {
       break;
   }
 }
-
+/* Detect vibration
+  * Read the vibration sensor value
+  * If the value is greater than 2000 for 5 seconds, change state to ALARM
+*/
 void detectVibration() {
   int value = analogRead(PIN_VIBRATION);
   //Serial.println(value);
@@ -106,8 +109,11 @@ void detectVibration() {
   timer = 0;
 }
 
-
-
+/* Receive data via Bluetooth 
+  * Read the data from the client one character at a time 
+  * If the data contains the device pair code
+  * Send the device information to the client 
+*/
 void bluetoothReceive() {
   char data[100];
   int i = 0;
@@ -129,6 +135,10 @@ void bluetoothReceive() {
     }
   }
 }
+/* Connect to WiFi
+  * If not already connected, connect to WiFi
+  * Retry every 500ms until connected
+*/
 void connectToWiFi() {
   if (WiFi.status() != WL_CONNECTED)
   {
@@ -143,7 +153,11 @@ void connectToWiFi() {
     Serial.println(WiFi.localIP());
   }
 }
-
+/* Send JSON via Bluetooth
+  * Create JSON object and send it to the client
+  * Send a "!" to indicate the end of the JSON data
+  * This is used by the client to know when to stop reading
+*/
 void bluetoothSendJsonEncode() {
   StaticJsonDocument<200> doc;
   doc["id"] = "123456789";
@@ -151,6 +165,9 @@ void bluetoothSendJsonEncode() {
   serializeJson(doc, SerialBT);
   bluetoothSend("!");
 }
+/* Send text via Bluetooth
+  * Send a char array one character at a time
+*/
 void bluetoothSend(char *data) {
   if (data != NULL)
   {
@@ -159,7 +176,10 @@ void bluetoothSend(char *data) {
   }
   }
 }
-
+/* Buzzer alarm 
+  * Play the buzzer for the duration of the alarm 
+  * If the alarm is turned off then stop playing the buzzer
+*/
 void buzzer(int duration_ms) {
   int start_time = millis();
   while (millis() - start_time < duration_ms) {
@@ -175,6 +195,10 @@ void buzzer(int duration_ms) {
     }
   }
 }
+/* Get local time
+  * Get the current time from the NTP server
+  * If the time is obtained, set the current hour and minute
+*/
 void getLocalTimeInfo(){
   if(!getLocalTime(&timeinfo)){
     Serial.println("Failed to obtain time");
@@ -185,7 +209,10 @@ void getLocalTimeInfo(){
     currentMinute = timeinfo.tm_min;
   }
 }
-
+/* Detection timer range
+  * Check if the current time is within the timer range
+  * If it is, start the alarm sound and start a new thread to send the http request
+*/  
 void detectionTimerRange(){
   if(currentHour >= startHour && currentHour <= endHour){ 
     if(currentMinute >= startMinute && currentMinute <= endMinute){
