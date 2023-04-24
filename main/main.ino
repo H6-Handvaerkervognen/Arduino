@@ -54,7 +54,7 @@ void setup() {
   pinMode(PIN_RED_LED, OUTPUT);
   pinMode(PIN_BLUE_LED, OUTPUT);
   pinMode(PIN_GREEN_LED, OUTPUT);
-  ledcAttachPin(TONE_OUTPUT_PIN, TONE_PWM_CHANNEL); 
+  ledcAttachPin(TONE_OUTPUT_PIN, TONE_PWM_CHANNEL);
   digitalWrite(PIN_RED_LED, HIGH);
 
   SerialBT.begin("VAN ALARM");
@@ -62,7 +62,7 @@ void setup() {
   configTime(3600, 3600, "pool.ntp.org", "time.nist.gov");
 }
 
-void loop() {  
+void loop() {
   connectToWiFi();
   getLocalTimeInfo();
   switch (currentState) {
@@ -70,9 +70,9 @@ void loop() {
       digitalWrite(PIN_RED_LED, LOW);
       digitalWrite(PIN_BLUE_LED, HIGH);
       digitalWrite(PIN_GREEN_LED, LOW);
-      while(devicePaired == false)
+      while (devicePaired == false)
       {
-        if(SerialBT.hasClient())
+        if (SerialBT.hasClient())
         {
           bluetoothReceive();
         }
@@ -89,7 +89,7 @@ void loop() {
       digitalWrite(PIN_RED_LED, LOW);
       digitalWrite(PIN_BLUE_LED, LOW);
       digitalWrite(PIN_GREEN_LED, HIGH);
-      if(devicePaired == true)
+      if (devicePaired == true)
       {
         detectVibration();
       }
@@ -97,8 +97,8 @@ void loop() {
   }
 }
 /* Detect vibration
-  * Read the vibration sensor value
-  * If the value is greater than 2000 for 5 seconds, change state to ALARM
+    Read the vibration sensor value
+    If the value is greater than 2000 for 5 seconds, change state to ALARM
 */
 void detectVibration() {
   int value = analogRead(PIN_VIBRATION);
@@ -115,10 +115,10 @@ void detectVibration() {
   timer = 0;
 }
 
-/* Receive data via Bluetooth 
-  * Read the data from the client one character at a time 
-  * If the data contains the device pair code
-  * Send the device information to the client 
+/* Receive data via Bluetooth
+    Read the data from the client one character at a time
+    If the data contains the device pair code
+    Send the device information to the client
 */
 void bluetoothReceive() {
   char data[100];
@@ -130,7 +130,7 @@ void bluetoothReceive() {
     data[i] = c;
     i++;
 
-    if(i >= 100){
+    if (i >= 100) {
       break;
     }
 
@@ -143,8 +143,8 @@ void bluetoothReceive() {
   }
 }
 /* Connect to WiFi
-  * If not already connected, connect to WiFi
-  * Retry every 500ms until connected
+    If not already connected, connect to WiFi
+    Retry every 500ms until connected
 */
 void connectToWiFi() {
   if (WiFi.status() != WL_CONNECTED)
@@ -161,9 +161,9 @@ void connectToWiFi() {
   }
 }
 /* Send JSON via Bluetooth
-  * Create JSON object and send it to the client
-  * Send a "!" to indicate the end of the JSON data
-  * This is used by the client to know when to stop reading
+    Create JSON object and send it to the client
+    Send a "!" to indicate the end of the JSON data
+    This is used by the client to know when to stop reading
 */
 void bluetoothSendJsonEncode() {
   StaticJsonDocument<200> doc;
@@ -173,19 +173,19 @@ void bluetoothSendJsonEncode() {
   bluetoothSend("!");
 }
 /* Send text via Bluetooth
-  * Send a char array one character at a time
+    Send a char array one character at a time
 */
 void bluetoothSend(char *data) {
   if (data != NULL)
   {
     for (int i = 0; i < sizeof(data); i++) {
       SerialBT.write(data[i]);
-  }
+    }
   }
 }
-/* Buzzer alarm 
-  * Play the buzzer for the duration of the alarm 
-  * If the alarm is turned off then stop playing the buzzer
+/* Buzzer alarm
+    Play the buzzer for the duration of the alarm
+    If the alarm is turned off then stop playing the buzzer
 */
 void buzzer(int duration_ms) {
   unsigned long start_time = millis();
@@ -197,36 +197,36 @@ void buzzer(int duration_ms) {
       ledcWriteTone(TONE_PWM_CHANNEL, 0);
       delay(noteDuration);
     }
-    if(alarmOn == false){
+    if (alarmOn == false) {
       start_time = millis() + duration_ms;
     }
   }
 }
 /* Get local time
-  * Get the current time from the NTP server
-  * If the time is obtained, set the current hour and minute
+    Get the current time from the NTP server
+    If the time is obtained, set the current hour and minute
 */
-void getLocalTimeInfo(){
-  if(!getLocalTime(&timeinfo)){
+void getLocalTimeInfo() {
+  if (!getLocalTime(&timeinfo)) {
     Serial.println("Failed to obtain time");
     return;
   }
-  else{
+  else {
     currentHour = timeinfo.tm_hour;
     currentMinute = timeinfo.tm_min;
   }
 }
 /* Detection timer range
-  * Check if the current time is within the timer range
-  * If it is, start the alarm sound and start a new thread to send the http request
-*/  
-void detectionTimerRange(){
-  if(currentHour >= startHour && currentHour <= endHour){ 
-    if(currentMinute >= startMinute && currentMinute <= endMinute){
+    Check if the current time is within the timer range
+    If it is, start the alarm sound and start a new thread to send the http request
+*/
+void detectionTimerRange() {
+  if (currentHour >= startHour && currentHour <= endHour) {
+    if (currentMinute >= startMinute && currentMinute <= endMinute) {
       Serial.println("############## ALARM!!! ##############");
-      
+
       //buzzer();
-      if(!threadCreated){
+      if (!threadCreated) {
         xTaskCreatePinnedToCore(sendHttpRequest, "sendHttpRequest", 10000, NULL, 1, NULL, 0);
         threadCreated = true;
       }
@@ -238,10 +238,10 @@ void detectionTimerRange(){
   }
 }
 
-/* Send HTTP request 
+/* Send HTTP request
 */
 //#################### TODO  ####################
-void sendHttpRequest(void * parameter){
+void sendHttpRequest(void * parameter) {
   int duration_s = 180;
   for (size_t i = 0; i < duration_s; i++)
   {
