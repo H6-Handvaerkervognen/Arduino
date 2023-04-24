@@ -246,10 +246,41 @@ void sendHttpRequest(void * parameter) {
   for (size_t i = 0; i < duration_s; i++)
   {
     Serial.println("Time left: " + String(duration_s - i));
+    sendRequest("http://jsonplaceholder.typicode.com/comments?id=10", "GET", "application/json");
     vTaskDelay(1000);
   }
   Serial.println("Task done!");
   threadCreated = false;
   vTaskDelete(NULL);
 }
-/*
+
+void sendRequest(char* url, char* requestType, char* content)
+{
+  Serial.println("Sending request...");
+  char* response;
+  if (WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+    http.begin(url);
+    http.addHeader("Content-Type", content);
+    if (requestType == "GET")
+    {
+      int httpResponseCode = http.GET();
+      if (httpResponseCode == 200)
+      {
+        Serial.println("Request sent!");
+        String response = http.getString();
+        Serial.println(response);
+      }
+      else
+      {
+        Serial.println("Error on sending GET: " + httpResponseCode);
+      }
+    }
+    else
+    {
+      Serial.println("Error on sending request: ");
+      Serial.print(requestType);
+    }
+  }
+}
+
