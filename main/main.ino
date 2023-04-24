@@ -217,12 +217,31 @@ void detectionTimerRange(){
   if(currentHour >= startHour && currentHour <= endHour){ 
     if(currentMinute >= startMinute && currentMinute <= endMinute){
       Serial.println("############## ALARM!!! ##############");
+      
       //buzzer();
-      currentState = IDLE;
+      if(!threadCreated){
+        xTaskCreatePinnedToCore(sendHttpRequest, "sendHttpRequest", 10000, NULL, 1, NULL, 0);
+        threadCreated = true;
+      }
+      currentState = PAIRING;
       digitalWrite(PIN_GREEN_LED, LOW);
       digitalWrite(PIN_BLUE_LED, LOW);
       digitalWrite(PIN_RED_LED, HIGH);
-      delay(1000);
     }
   }
+
+/* Send HTTP request 
+*/
+//#################### TODO  ####################
+void sendHttpRequest(void * parameter){
+  int duration_s = 180;
+  for (size_t i = 0; i < duration_s; i++)
+  {
+    Serial.println("Time left: " + String(duration_s - i));
+    vTaskDelay(1000);
+  }
+  Serial.println("Task done!");
+  threadCreated = false;
+  vTaskDelete(NULL);
 }
+/*
