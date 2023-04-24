@@ -1,7 +1,7 @@
 #include <BluetoothSerial.h>
 #include <ArduinoJson.h>  //6.21.0
 #include <WiFi.h>
-
+#include <HTTPClient.h>
 
 #define PIN_VIBRATION 34
 #define PIN_RED_LED 32
@@ -36,6 +36,7 @@ int currentMinute = 0;
 
 bool alarmOn = false;
 bool devicePaired = false;
+bool threadCreated = false;
 
 int melody[] = {  // note frequency
   262, 262, 262, 262, 262, 262, 262, 262
@@ -61,30 +62,35 @@ void setup() {
   configTime(3600, 3600, "pool.ntp.org", "time.nist.gov");
 }
 
-void loop() {
-  getLocalTimeInfo();
+void loop() {  
   connectToWiFi();
+  getLocalTimeInfo();
   switch (currentState) {
     case IDLE:
       digitalWrite(PIN_RED_LED, LOW);
       digitalWrite(PIN_BLUE_LED, HIGH);
-      if (SerialBT.hasClient()) {
-        currentState = PAIRING;
-        digitalWrite(PIN_BLUE_LED, LOW);
-        digitalWrite(PIN_GREEN_LED, HIGH);
+      digitalWrite(PIN_GREEN_LED, LOW);
+      while(devicePaired == false)
+      {
+        if(SerialBT.hasClient())
+        {
+          bluetoothReceive();
+        }
       }
 
       break;
     case ALARM:
+      digitalWrite(PIN_RED_LED, HIGH);
+      digitalWrite(PIN_BLUE_LED, LOW);
+      digitalWrite(PIN_GREEN_LED, LOW);
       detectionTimerRange();
       break;
     case PAIRING:
-      if (!SerialBT.hasClient()) {
-        currentState = IDLE;
-        digitalWrite(PIN_GREEN_LED, LOW);
-        digitalWrite(PIN_BLUE_LED, HIGH);
-      } else {
-        bluetoothReceive();
+      digitalWrite(PIN_RED_LED, LOW);
+      digitalWrite(PIN_BLUE_LED, LOW);
+      digitalWrite(PIN_GREEN_LED, HIGH);
+      if(devicePaired == true)
+      {
         detectVibration();
       }
       break;
@@ -130,6 +136,7 @@ void bluetoothReceive() {
 
     if (SerialBT.available() == 0 && strstr(data, DEVICE_PAIR_CODE) != NULL && devicePaired == false) {
       devicePaired = true;
+      currentState = PAIRING;
       bluetoothSendJsonEncode();
       i = 0;
     }
@@ -181,7 +188,7 @@ void bluetoothSend(char *data) {
   * If the alarm is turned off then stop playing the buzzer
 */
 void buzzer(int duration_ms) {
-  int start_time = millis();
+  unsigned long start_time = millis();
   while (millis() - start_time < duration_ms) {
     for (int i = 0; i < 8; i++) {
       int noteDuration = 1000 / noteDurations[i];
@@ -229,6 +236,7 @@ void detectionTimerRange(){
       digitalWrite(PIN_RED_LED, HIGH);
     }
   }
+}
 
 /* Send HTTP request 
 */
