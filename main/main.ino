@@ -285,6 +285,41 @@ void sendRequest(char* url, char* requestType, char* content)
         Serial.println("Request sent!");
         String response = http.getString();
         Serial.println(response);
+        if(strstr(response.c_str(), "false") != NULL)
+        {
+          Serial.println("Alarm is off!");
+          alarmOn = false;
+        }
+        else if (strstr(response.c_str(), "timeStart") != NULL && strstr(response.c_str(), "timeEnd") != NULL)
+        {
+
+            StaticJsonDocument<200> doc;
+            DeserializationError error = deserializeJson(doc, response);
+            if (error) {
+              Serial.print(F("deserializeJson() failed: "));
+              Serial.println(error.f_str());
+              return;
+            }
+            const char* timeStart = doc["timeStart"];
+            const char* timeEnd = doc["timeEnd"];
+            Serial.println(timeStart);
+            Serial.println(timeEnd);
+
+            char* startHourChar = strtok("timeStart", ":");
+            char* startMinuteChar = strtok(NULL, ":");
+            char* endHourChar = strtok("timeEnd", ":");
+            char* endMinuteChar = strtok(NULL , ":");
+            startHour = atoi(startHourChar);
+            startMinute = atoi(startMinuteChar);
+            endHour = atoi(endHourChar);
+            endMinute = atoi(endMinuteChar);
+            Serial.println(startHour);
+            Serial.println(startMinute);
+            Serial.println(endHour);
+            Serial.println(endMinute);
+
+        }
+        
       }
       else
       {
