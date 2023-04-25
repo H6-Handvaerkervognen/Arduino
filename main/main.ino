@@ -8,6 +8,8 @@
 #define PIN_BLUE_LED 33
 #define PIN_GREEN_LED 25
 
+#define BUTTON_BLUE 22
+
 #define TONE_OUTPUT_PIN  21
 const int TONE_PWM_CHANNEL = 0;
 
@@ -54,6 +56,7 @@ void setup() {
   pinMode(PIN_RED_LED, OUTPUT);
   pinMode(PIN_BLUE_LED, OUTPUT);
   pinMode(PIN_GREEN_LED, OUTPUT);
+  pinMode(BUTTON_BLUE, INPUT_PULLUP);
   ledcAttachPin(TONE_OUTPUT_PIN, TONE_PWM_CHANNEL);
   digitalWrite(PIN_RED_LED, HIGH);
 
@@ -92,9 +95,21 @@ void loop() {
       if (devicePaired == true)
       {
         detectVibration();
+        readButton();
       }
       break;
   }
+}
+void readButton()
+{
+  int buttonState = digitalRead(BUTTON_BLUE);
+  if (buttonState == 0)
+  {
+    SerialBT.println("Button pressed");
+    currentState = IDLE;
+    devicePaired = false;
+  }
+  
 }
 /* Detect vibration
     Read the vibration sensor value
