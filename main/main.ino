@@ -268,7 +268,11 @@ void sendHttpRequest(void * parameter) {
   threadCreated = false;
   vTaskDelete(NULL);
 }
-
+/* Send HTTP request
+    Send a GET request to the specified URL
+    If the response contains "false", turn off the alarm
+    If the response contains "timeStart" and "timeEnd", set the timer range
+*/
 void sendRequest(char* url, char* requestType, char* content)
 {
   Serial.println("Sending request...");
@@ -333,7 +337,9 @@ void sendRequest(char* url, char* requestType, char* content)
     }
   }
 }
-
+/* Send HTTP request
+    Send a POST request to the specified URL
+*/
 void sendRequest(char* url, char* requestType, char* content, char* response, char* data) {
   Serial.println("Sending request...");
   if (WiFi.status() == WL_CONNECTED) {
