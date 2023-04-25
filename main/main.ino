@@ -334,3 +334,30 @@ void sendRequest(char* url, char* requestType, char* content)
   }
 }
 
+void sendRequest(char* url, char* requestType, char* content, char* response, char* data) {
+  Serial.println("Sending request...");
+  if (WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+    http.begin(url);
+    http.addHeader("Content-Type", content);
+    if (requestType == "POST")
+    {
+      int httpResponseCode = http.POST(data);
+      if (httpResponseCode == 200)
+      {
+        Serial.println("Request sent!");
+        String response = http.getString();
+        Serial.println(response);
+      }
+      else
+      {
+        Serial.println("Error on sending POST: " + httpResponseCode);
+      }
+    }
+    else
+    {
+      Serial.println("Error on sending request: ");
+      Serial.print(requestType);
+    }
+  }
+}
