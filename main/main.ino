@@ -13,9 +13,9 @@
 #define TONE_OUTPUT_PIN  21
 const int TONE_PWM_CHANNEL = 0;
 
-#define SSID "ZBC-E-CH-SKP019 0986"
-#define PASSWORD "710%dK14"
-#define DEVICE_PAIR_CODE "123456789"
+#define SSID "Linksys00082"
+#define PASSWORD "h@ndVaerk58"
+#define DEVICE_PAIR_CODE "12345"
 
 enum State {
   IDLE,
@@ -239,6 +239,7 @@ void detectionTimerRange() {
   if (currentHour >= startHour && currentHour <= endHour) {
     if (currentMinute >= startMinute && currentMinute <= endMinute) {
       Serial.println("############## ALARM!!! ##############");
+      alarmOn = true;
 
       //buzzer();
       if (!threadCreated) {
@@ -260,6 +261,9 @@ void sendHttpRequest(void * parameter) {
   int duration_s = 180;
   for (size_t i = 0; i < duration_s; i++)
   {
+    if(alarmOn == false) {
+      i = duration_s;
+    }
     Serial.println("Time left: " + String(duration_s - i));
     sendRequest("http://jsonplaceholder.typicode.com/comments?id=10", "GET", "application/json");
     vTaskDelay(1000);
@@ -294,7 +298,7 @@ void sendRequest(char* url, char* requestType, char* content)
           Serial.println("Alarm is off!");
           alarmOn = false;
         }
-        else if (strstr(response.c_str(), "timeStart") != NULL && strstr(response.c_str(), "timeEnd") != NULL)
+        else if (strstr(response.c_str(), "startTime") != NULL && strstr(response.c_str(), "endTime") != NULL)
         {
 
             StaticJsonDocument<200> doc;
@@ -304,14 +308,14 @@ void sendRequest(char* url, char* requestType, char* content)
               Serial.println(error.f_str());
               return;
             }
-            const char* timeStart = doc["timeStart"];
-            const char* timeEnd = doc["timeEnd"];
+            const char* timeStart = doc["startTime"];
+            const char* timeEnd = doc["endTime"];
             Serial.println(timeStart);
             Serial.println(timeEnd);
 
-            char* startHourChar = strtok("timeStart", ":");
+            char* startHourChar = strtok("startTime", ":");
             char* startMinuteChar = strtok(NULL, ":");
-            char* endHourChar = strtok("timeEnd", ":");
+            char* endHourChar = strtok("endTime", ":");
             char* endMinuteChar = strtok(NULL , ":");
             startHour = atoi(startHourChar);
             startMinute = atoi(startMinuteChar);
