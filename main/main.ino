@@ -71,7 +71,7 @@ void setup() {
   SerialBT.begin("VAN ALARM");
   connectToWiFi();
   configTime(3600, 3600, "pool.ntp.org", "time.nist.gov");
-  sendRequest("http://192.168.1.11/Alarm/GetAlarmInfo?alarmId=1", "GET","application/json");
+  sendRequest("http://192.168.1.11/Alarm/GetAlarmInfo?alarmId=1", "GET", "application/json");
 }
 
 void loop() {
@@ -113,23 +113,23 @@ void loop() {
   }
 }
 
-void rfRead(void * parameter)
+void rcRead(void * parameter)
 {
-    RCSwitch mySwitch = RCSwitch();
-    mySwitch.enableReceive(RC_SWITCH_PIN);
-    int duration_s = 180;
-    for (int i = 0; i < duration_s; i++)
+  RCSwitch mySwitch = RCSwitch();
+  mySwitch.enableReceive(RC_SWITCH_PIN);
+  int duration_s = 180;
+  for (int i = 0; i < duration_s; i++)
+  {
+    if (alarmOn == false)
     {
-      if (alarmOn == false)
-      {
-        vTaskDelete(NULL);
-      }
-      
-    if(mySwitch.available())
+      vTaskDelete(NULL);
+    }
+
+    if (mySwitch.available())
     {
       int value = mySwitch.getReceivedValue();
       Serial.println(value);
-      if(value == 6941604 || value == 6941601 || value == 6941608 || value == 6939554)
+      if (value == 6941604 || value == 6941601 || value == 6941608 || value == 6939554)
       {
         alarmOn = false;
         Serial.println("Alarm off");
@@ -137,9 +137,9 @@ void rfRead(void * parameter)
       }
     }
     vTaskDelay(1000);
-    }
+  }
 
-    
+
 }
 
 void readButton()
@@ -287,10 +287,10 @@ void detectionTimerRange() {
       digitalWrite(PIN_BLUE_LED, LOW);
       digitalWrite(PIN_GREEN_LED, LOW);
 
-      
+
       if (!threadCreated) {
         xTaskCreatePinnedToCore(sendHttpRequest, "sendHttpRequest", 10000, NULL, 1, NULL, 0);
-        xTaskCreatePinnedToCore(rfRead, "rfRead", 10000, NULL, 1, NULL, 0);
+        xTaskCreatePinnedToCore(rcRead, "rcRead", 10000, NULL, 1, NULL, 0);
         threadCreated = true;
         buzzer(18000);
       }
@@ -311,7 +311,7 @@ void sendHttpRequest(void * parameter) {
   int duration_s = 180;
   for (size_t i = 0; i < duration_s; i++)
   {
-    if(alarmOn == false) {
+    if (alarmOn == false) {
       threadCreated = false;
       vTaskDelete(NULL);
     }
@@ -344,7 +344,7 @@ void sendRequest(char* url, char* requestType, char* content)
         Serial.println("Request sent!");
         String response = http.getString();
         Serial.println(response);
-        if(strstr(response.c_str(), "false") != NULL)
+        if (strstr(response.c_str(), "false") != NULL)
         {
           Serial.println("Alarm is off!");
           alarmOn = false;
@@ -352,33 +352,33 @@ void sendRequest(char* url, char* requestType, char* content)
         else if (strstr(response.c_str(), "startTime") != NULL && strstr(response.c_str(), "endTime") != NULL)
         {
 
-            StaticJsonDocument<200> doc;
-            DeserializationError error = deserializeJson(doc, response);
-            if (error) {
-              Serial.print(F("deserializeJson() failed: "));
-              Serial.println(error.f_str());
-              return;
-            }
-            const char* startTime = doc["startTime"];
-            const char* endTime = doc["endTime"];
-            Serial.println(startTime);
-            Serial.println(endTime);
+          StaticJsonDocument<200> doc;
+          DeserializationError error = deserializeJson(doc, response);
+          if (error) {
+            Serial.print(F("deserializeJson() failed: "));
+            Serial.println(error.f_str());
+            return;
+          }
+          const char* startTime = doc["startTime"];
+          const char* endTime = doc["endTime"];
+          Serial.println(startTime);
+          Serial.println(endTime);
 
-            char* startHourChar = strtok("startTime", ":");
-            char* startMinuteChar = strtok(NULL, ":");
-            char* endHourChar = strtok("endTime", ":");
-            char* endMinuteChar = strtok(NULL , ":");
-            startHour = atoi(startHourChar);
-            startMinute = atoi(startMinuteChar);
-            endHour = atoi(endHourChar);
-            endMinute = atoi(endMinuteChar);
-            Serial.println(startHour);
-            Serial.println(startMinute);
-            Serial.println(endHour);
-            Serial.println(endMinute);
+          char* startHourChar = strtok("startTime", ":");
+          char* startMinuteChar = strtok(NULL, ":");
+          char* endHourChar = strtok("endTime", ":");
+          char* endMinuteChar = strtok(NULL , ":");
+          startHour = atoi(startHourChar);
+          startMinute = atoi(startMinuteChar);
+          endHour = atoi(endHourChar);
+          endMinute = atoi(endMinuteChar);
+          Serial.println(startHour);
+          Serial.println(startMinute);
+          Serial.println(endHour);
+          Serial.println(endMinute);
 
         }
-        
+
       }
       else
       {
