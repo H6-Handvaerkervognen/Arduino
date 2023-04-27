@@ -68,6 +68,7 @@ void setup() {
   SerialBT.begin("VAN ALARM");
   connectToWiFi();
   configTime(3600, 3600, "pool.ntp.org", "time.nist.gov");
+  sendRequest("http://192.168.1.11/Alarm/GetAlarmInfo?alarmId=1", "GET","application/json");
 }
 
 void loop() {
@@ -144,7 +145,6 @@ void readButton()
     currentState = IDLE;
     devicePaired = false;
   }
-  
 }
 /* Detect vibration
     Read the vibration sensor value
@@ -275,6 +275,7 @@ void detectionTimerRange() {
     if (currentMinute >= startMinute && currentMinute <= endMinute) {
       Serial.println("############## ALARM!!! ##############");
       alarmOn = true;
+      sendRequest("http://192.168.1.11/Alarm/ActivateAlarm?alarmId=1", "POST", "application/json");
 
       //buzzer();
       if (!threadCreated) {
@@ -298,10 +299,11 @@ void sendHttpRequest(void * parameter) {
   for (size_t i = 0; i < duration_s; i++)
   {
     if(alarmOn == false) {
-      i = duration_s;
+      threadCreated = false;
+      vTaskDelete(NULL);
     }
     Serial.println("Time left: " + String(duration_s - i));
-    sendRequest("http://jsonplaceholder.typicode.com/comments?id=10", "GET", "application/json");
+    sendRequest("http://192.168.1.11/Alarm/AlarmStatus?alarmId=1", "GET", "application/json");
     vTaskDelay(1000);
   }
   Serial.println("Task done!");
