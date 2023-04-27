@@ -113,35 +113,10 @@ void loop() {
   }
 }
 
-void rcRead(void * parameter)
-{
-  RCSwitch mySwitch = RCSwitch();
-  mySwitch.enableReceive(RC_SWITCH_PIN);
-  int duration_s = 180;
-  for (int i = 0; i < duration_s; i++)
-  {
-    if (alarmOn == false)
-    {
-      vTaskDelete(NULL);
-    }
-
-    if (mySwitch.available())
-    {
-      int value = mySwitch.getReceivedValue();
-      Serial.println(value);
-      if (value == 6941604 || value == 6941601 || value == 6941608 || value == 6939554)
-      {
-        alarmOn = false;
-        Serial.println("Alarm off");
-        vTaskDelete(NULL);
-      }
-    }
-    vTaskDelay(1000);
-  }
-
-
-}
-
+/* Read button state
+    If the button is pressed
+    Change state to IDLE
+*/
 void readButton()
 {
   int buttonState = digitalRead(BUTTON_BLUE);
@@ -274,7 +249,10 @@ void getLocalTimeInfo() {
 }
 /* Detection timer range
     Check if the current time is within the timer range
-    If it is, start the alarm sound and start a new thread to send the http request
+    If it is, start the alarm sound and send a http request
+    Create 2 threads
+    thred 1 for sending http request
+    thread 2 for reading the RC switch
 */
 void detectionTimerRange() {
   if (currentHour >= startHour && currentHour <= endHour) {
@@ -304,9 +282,10 @@ void detectionTimerRange() {
   }
 }
 
-/* Send HTTP request
+/* Send HTTP request thread function
+    Send a GET request to the api every second to check if the alarm is turned off
+    If the alarm is turned off, stop the thread
 */
-//#################### TODO  ####################
 void sendHttpRequest(void * parameter) {
   int duration_s = 180;
   for (size_t i = 0; i < duration_s; i++)
@@ -323,6 +302,41 @@ void sendHttpRequest(void * parameter) {
   threadCreated = false;
   vTaskDelete(NULL);
 }
+
+/* RC Read thread function
+    Read the RC switch value
+    If the value is from the paird remote
+    Turn off the alarm
+*/
+void rcRead(void * parameter)
+{
+  RCSwitch mySwitch = RCSwitch();
+  mySwitch.enableReceive(RC_SWITCH_PIN);
+  int duration_s = 180;
+  for (int i = 0; i < duration_s; i++)
+  {
+    if (alarmOn == false)
+    {
+      vTaskDelete(NULL);
+    }
+
+    if (mySwitch.available())
+    {
+      int value = mySwitch.getReceivedValue();
+      Serial.println(value);
+      if (value == 6941604 || value == 6941601 || value == 6941608 || value == 6939554)
+      {
+        alarmOn = false;
+        Serial.println("Alarm off");
+        vTaskDelete(NULL);
+      }
+    }
+    vTaskDelay(1000);
+  }
+
+
+}
+
 /* Send HTTP request
     Send a GET request to the specified URL
     If the response contains "false", turn off the alarm
@@ -422,3 +436,5 @@ void sendRequest(char* url, char* requestType, char* content, char* response, ch
     }
   }
 }
+
+
