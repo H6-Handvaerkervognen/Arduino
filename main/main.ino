@@ -11,6 +11,8 @@
 #define PIN_RED_LED 32
 #define PIN_BLUE_LED 33
 #define PIN_GREEN_LED 25
+#define PIN_YELLOW_LED 26
+
 #define RC_SWITCH_PIN 16
 
 #define BUTTON_BLUE 22
@@ -61,6 +63,7 @@ void setup() {
   pinMode(PIN_RED_LED, OUTPUT);
   pinMode(PIN_BLUE_LED, OUTPUT);
   pinMode(PIN_GREEN_LED, OUTPUT);
+  pinMode(PIN_YELLOW_LED, OUTPUT);
   pinMode(BUTTON_BLUE, INPUT_PULLUP);
   ledcAttachPin(TONE_OUTPUT_PIN, TONE_PWM_CHANNEL);
   digitalWrite(PIN_RED_LED, HIGH);
@@ -79,6 +82,7 @@ void loop() {
       digitalWrite(PIN_RED_LED, LOW);
       digitalWrite(PIN_BLUE_LED, HIGH);
       digitalWrite(PIN_GREEN_LED, LOW);
+      digitalWrite(PIN_YELLOW_LED, LOW);
       while (devicePaired == false)
       {
         if (SerialBT.hasClient())
@@ -92,9 +96,11 @@ void loop() {
       digitalWrite(PIN_RED_LED, HIGH);
       digitalWrite(PIN_BLUE_LED, LOW);
       digitalWrite(PIN_GREEN_LED, LOW);
+      digitalWrite(PIN_YELLOW_LED, LOW);
       detectionTimerRange();
       break;
     case PAIRING:
+      digitalWrite(PIN_YELLOW_LED, LOW);
       digitalWrite(PIN_RED_LED, LOW);
       digitalWrite(PIN_BLUE_LED, LOW);
       digitalWrite(PIN_GREEN_LED, HIGH);
@@ -276,6 +282,10 @@ void detectionTimerRange() {
       Serial.println("############## ALARM!!! ##############");
       alarmOn = true;
       sendRequest("http://192.168.1.11/Alarm/ActivateAlarm?alarmId=1", "POST", "application/json");
+      digitalWrite(PIN_YELLOW_LED, HIGH);
+      digitalWrite(PIN_RED_LED, LOW);
+      digitalWrite(PIN_BLUE_LED, LOW);
+      digitalWrite(PIN_GREEN_LED, LOW);
 
       //buzzer();
       if (!threadCreated) {
@@ -287,6 +297,7 @@ void detectionTimerRange() {
       digitalWrite(PIN_GREEN_LED, LOW);
       digitalWrite(PIN_BLUE_LED, LOW);
       digitalWrite(PIN_RED_LED, HIGH);
+      digitalWrite(PIN_YELLOW_LED, LOW);
     }
   }
 }
