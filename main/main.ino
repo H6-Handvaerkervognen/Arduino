@@ -2,6 +2,8 @@
 #include <ArduinoJson.h>  //6.21.0
 #include <WiFi.h>
 #include <HTTPClient.h>
+#define DEVICE_ID 1
+#define DEVICE_NAME "VAN ALARM"
 
 #define PIN_VIBRATION 34
 #define PIN_RED_LED 32
@@ -182,8 +184,8 @@ void connectToWiFi() {
 */
 void bluetoothSendJsonEncode() {
   StaticJsonDocument<200> doc;
-  doc["id"] = "123456789";
-  doc["name"] = "VAN ALARM";
+  doc["id"] = DEVICE_ID;
+  doc["name"] = DEVICE_NAME;
   serializeJson(doc, SerialBT);
   bluetoothSend("!");
 }
@@ -308,10 +310,10 @@ void sendRequest(char* url, char* requestType, char* content)
               Serial.println(error.f_str());
               return;
             }
-            const char* timeStart = doc["startTime"];
-            const char* timeEnd = doc["endTime"];
-            Serial.println(timeStart);
-            Serial.println(timeEnd);
+            const char* startTime = doc["startTime"];
+            const char* endTime = doc["endTime"];
+            Serial.println(startTime);
+            Serial.println(endTime);
 
             char* startHourChar = strtok("startTime", ":");
             char* startMinuteChar = strtok(NULL, ":");
