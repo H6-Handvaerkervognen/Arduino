@@ -248,9 +248,9 @@ void buzzer(int duration_ms) {
   while (millis() - start_time < duration_ms) {
     for (int i = 0; i < 8; i++) {
       int noteDuration = 1000 / noteDurations[i];
-      ledcWriteTone(TONE_PWM_CHANNEL, melody[i]);
+      //ledcWriteTone(TONE_PWM_CHANNEL, melody[i]);
       delay(noteDuration);
-      ledcWriteTone(TONE_PWM_CHANNEL, 0);
+      //ledcWriteTone(TONE_PWM_CHANNEL, 0);
       delay(noteDuration);
     }
     if (alarmOn == false) {
@@ -287,12 +287,14 @@ void detectionTimerRange() {
       digitalWrite(PIN_BLUE_LED, LOW);
       digitalWrite(PIN_GREEN_LED, LOW);
 
-      //buzzer();
+      
       if (!threadCreated) {
         xTaskCreatePinnedToCore(sendHttpRequest, "sendHttpRequest", 10000, NULL, 1, NULL, 0);
         xTaskCreatePinnedToCore(rfRead, "rfRead", 10000, NULL, 1, NULL, 0);
         threadCreated = true;
+        buzzer(18000);
       }
+
       currentState = PAIRING;
       digitalWrite(PIN_GREEN_LED, LOW);
       digitalWrite(PIN_BLUE_LED, LOW);
