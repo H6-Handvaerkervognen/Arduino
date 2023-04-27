@@ -2,6 +2,8 @@
 #include <ArduinoJson.h>  //6.21.0
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <RCSwitch.h>
+
 #define DEVICE_ID 1
 #define DEVICE_NAME "VAN ALARM"
 
@@ -9,6 +11,7 @@
 #define PIN_RED_LED 32
 #define PIN_BLUE_LED 33
 #define PIN_GREEN_LED 25
+#define RC_SWITCH_PIN 16
 
 #define BUTTON_BLUE 22
 
@@ -102,6 +105,36 @@ void loop() {
       break;
   }
 }
+
+void rfRead(void * parameter)
+{
+    RCSwitch mySwitch = RCSwitch();
+    mySwitch.enableReceive(RC_SWITCH_PIN);
+    int duration_s = 180;
+    for (int i = 0; i < duration_s; i++)
+    {
+      if (alarmOn == false)
+      {
+        vTaskDelete(NULL);
+      }
+      
+    if(mySwitch.available())
+    {
+      int value = mySwitch.getReceivedValue();
+      Serial.println(value);
+      if(value == 6941604 || value == 6941601 || value == 6941608 || value == 6939554)
+      {
+        alarmOn = false;
+        Serial.println("Alarm off");
+        vTaskDelete(NULL);
+      }
+    }
+    vTaskDelay(1000);
+    }
+
+    
+}
+
 void readButton()
 {
   int buttonState = digitalRead(BUTTON_BLUE);
@@ -246,6 +279,7 @@ void detectionTimerRange() {
       //buzzer();
       if (!threadCreated) {
         xTaskCreatePinnedToCore(sendHttpRequest, "sendHttpRequest", 10000, NULL, 1, NULL, 0);
+        xTaskCreatePinnedToCore(rfRead, "rfRead", 10000, NULL, 1, NULL, 0);
         threadCreated = true;
       }
       currentState = PAIRING;
