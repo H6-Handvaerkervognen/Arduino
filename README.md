@@ -10,8 +10,11 @@ Now under `Tools -> Board -> Boards Manager` search for `ESP32` and install the 
 ## Libraries
 | Name | Url |
 |--|--|
+| BluetoothSerial | https://github.com/espressif/arduino-esp32 |
 | ArduinoJson | https://arduinojson.org/ |
-
+| WiFi | https://github.com/espressif/arduino-esp32 |
+| RCSwitch | https://github.com/sui77/rc-switch |
+| WiFiClientSecure | https://github.com/espressif/arduino-esp32 |
 
 ## Increase Memory 
 Open file path
