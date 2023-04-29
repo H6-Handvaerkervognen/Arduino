@@ -15,7 +15,8 @@
 
 #define RC_SWITCH_PIN 16
 
-#define BUTTON_BLUE 22
+#define BUTTON_BLUE 22 
+#define BUTTON_BLACK 19 
 
 #define TONE_OUTPUT_PIN  21
 const int TONE_PWM_CHANNEL = 0;
@@ -107,24 +108,34 @@ void loop() {
       if (devicePaired == true)
       {
         detectVibration();
-        readButton();
+        readButton(BUTTON_BLUE);
+        readButton(BUTTON_BLACK);
       }
       break;
   }
 }
 
 /* Read button state
-    If the button is pressed
-    Change state to IDLE
+    Read the button state
+    If the blue button is pressed, change state to IDLE
+    If the black button is pressed, restart the device to factory settings
 */
-void readButton()
+void readButton(int button)
 {
-  int buttonState = digitalRead(BUTTON_BLUE);
-  if (buttonState == 0)
+  int buttonState = digitalRead(button);
+  if (buttonState == 0 && alarmOn == false)
   {
-    SerialBT.println("Button pressed");
-    currentState = IDLE;
-    devicePaired = false;
+    if(button == BUTTON_BLUE)
+    {
+      SerialBT.println("Blue button pressed");
+      currentState = IDLE;
+      devicePaired = false;
+    }
+    else if(button == BUTTON_BLACK)
+    {
+      SerialBT.println("Black button pressed");
+      ESP.restart();
+    }
   }
 }
 /* Detect vibration
