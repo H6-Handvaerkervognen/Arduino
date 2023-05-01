@@ -109,9 +109,9 @@ void loop() {
       digitalWrite(PIN_GREEN_LED, HIGH);
       if (devicePaired == true)
       {
-        detectVibration();
         readButton(BUTTON_BLUE);
         readButton(BUTTON_BLACK);
+        detectVibration();
       }
       break;
   }
@@ -129,13 +129,13 @@ void readButton(int button)
   {
     if(button == BUTTON_BLUE)
     {
-      SerialBT.println("Blue button pressed");
+      Serial.println("Blue button pressed");
       currentState = IDLE;
       devicePaired = false;
     }
     else if(button == BUTTON_BLACK)
     {
-      SerialBT.println("Black button pressed");
+      Serial.println("Black button pressed");
       ESP.restart();
     }
   }
