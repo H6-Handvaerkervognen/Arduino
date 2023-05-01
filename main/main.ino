@@ -268,8 +268,10 @@ void getLocalTimeInfo() {
     thread 2 for reading the RC switch
 */
 void detectionTimerRange() {
-  if (currentHour >= startHour && currentHour <= endHour) {
-    if (currentMinute >= startMinute && currentMinute <= endMinute) {
+  if ((currentHour > startHour || (currentHour == startHour && currentMinute >= startMinute))
+    && ((currentHour < endHour || (currentHour == endHour && currentMinute <= endMinute)) || (endHour < startHour && (currentHour < endHour || currentHour == endHour && currentMinute <= endMinute)))
+    || (currentHour == endHour && currentMinute <= endMinute && endHour >= startHour)
+    || (currentHour == startHour && currentMinute >= startMinute && endHour >= startHour)) {
       Serial.println("############## ALARM!!! ##############");
       alarmOn = true;
       httpsRequest("https://192.168.1.11/Alarm/ActivateAlarm", "POST", "application/json","{\"alarmID\": \"1\"}");
