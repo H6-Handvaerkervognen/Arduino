@@ -66,6 +66,7 @@ void setup() {
   pinMode(PIN_GREEN_LED, OUTPUT);
   pinMode(PIN_YELLOW_LED, OUTPUT);
   pinMode(BUTTON_BLUE, INPUT_PULLUP);
+  pinMode(BUTTON_BLACK, INPUT_PULLUP);
   ledcAttachPin(TONE_OUTPUT_PIN, TONE_PWM_CHANNEL);
   digitalWrite(PIN_RED_LED, HIGH);
 
@@ -369,18 +370,18 @@ void sendRequest(char* url, char* requestType, char* content)
         Serial.println("Request sent!");
         String response = http.getString();
         Serial.println(response);
-        if (strstr(response.c_str(), "false") != NULL)
+        if(strstr(response.c_str(), "false") != NULL)
         {
           Serial.println("Alarm is off!");
           alarmOn = false;
         }
-        else if (strstr(response.c_str(), "startTime") != NULL && strstr(response.c_str(), "endTime") != NULL)
+        else if(strstr(response.c_str(), "startTime") != NULL && strstr(response.c_str(), "endTime") != NULL)
         {
 
           StaticJsonDocument<200> doc;
           DeserializationError error = deserializeJson(doc, response);
           if (error) {
-            Serial.print(F("deserializeJson() failed: "));
+            Serial.println("deserializeJson() failed: ");
             Serial.println(error.f_str());
             return;
           }
@@ -389,21 +390,22 @@ void sendRequest(char* url, char* requestType, char* content)
           Serial.println(startTime);
           Serial.println(endTime);
 
-          char* startHourChar = strtok("startTime", ":");
+          char* startHourChar = strtok((char*)startTime, ":");
           char* startMinuteChar = strtok(NULL, ":");
-          char* endHourChar = strtok("endTime", ":");
+          char* endHourChar = strtok((char*)endTime, ":");
           char* endMinuteChar = strtok(NULL , ":");
+
           startHour = atoi(startHourChar);
           startMinute = atoi(startMinuteChar);
           endHour = atoi(endHourChar);
           endMinute = atoi(endMinuteChar);
+
           Serial.println(startHour);
           Serial.println(startMinute);
           Serial.println(endHour);
           Serial.println(endMinute);
-
+          
         }
-
       }
       else
       {
