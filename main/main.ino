@@ -3,6 +3,7 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <RCSwitch.h>
+#include <WiFiClientSecure.h>
 
 #define DEVICE_ID 1
 #define DEVICE_NAME "VAN ALARM"
@@ -73,7 +74,7 @@ void setup() {
   SerialBT.begin("VAN ALARM");
   connectToWiFi();
   configTime(3600, 3600, "pool.ntp.org", "time.nist.gov");
-  sendRequest("http://192.168.1.11/Alarm/GetAlarmInfo?alarmId=1", "GET", "application/json");
+  httpsRequest("https://192.168.1.11/Alarm/GetAlarmInfo?alarmId=1", "GET", "application/json");
 }
 
 void loop() {
@@ -271,7 +272,7 @@ void detectionTimerRange() {
     if (currentMinute >= startMinute && currentMinute <= endMinute) {
       Serial.println("############## ALARM!!! ##############");
       alarmOn = true;
-      sendRequest("http://192.168.1.11/Alarm/ActivateAlarm?alarmId=1", "POST", "application/json");
+      httpsRequest("https://192.168.1.11/Alarm/ActivateAlarm", "POST", "application/json","{\"alarmID\": \"1\"}");
       digitalWrite(PIN_YELLOW_LED, HIGH);
       digitalWrite(PIN_RED_LED, LOW);
       digitalWrite(PIN_BLUE_LED, LOW);
@@ -307,7 +308,7 @@ void sendHttpRequest(void * parameter) {
       vTaskDelete(NULL);
     }
     Serial.println("Time left: " + String(duration_s - i));
-    sendRequest("http://192.168.1.11/Alarm/AlarmStatus?alarmId=1", "GET", "application/json");
+    httpsRequest("https://192.168.1.11/Alarm/AlarmStatus?alarmId=1", "GET", "application/json");
     vTaskDelay(1000);
   }
   Serial.println("Task done!");
@@ -349,26 +350,31 @@ void rcRead(void * parameter)
 
 }
 
-/* Send HTTP request
+/* Send HTTPS request
     Send a GET request to the specified URL
     If the response contains "false", turn off the alarm
     If the response contains "timeStart" and "timeEnd", set the timer range
+
 */
-void sendRequest(char* url, char* requestType, char* content)
-{
+void httpsRequest(char* url, char* requestType, char* content) {
   Serial.println("Sending request...");
   char* response;
-  if (WiFi.status() == WL_CONNECTED) {
-    HTTPClient http;
-    http.begin(url);
-    http.addHeader("Content-Type", content);
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    char* certificate;
+    WiFiClientSecure *client = new WiFiClientSecure;
+    client->setCACert(certificate);
+    client->setInsecure();
+    HTTPClient https;
+    https.begin(*client, url);
+    https.addHeader("Content-Type", content);
     if (requestType == "GET")
     {
-      int httpResponseCode = http.GET();
-      if (httpResponseCode == 200)
+      int httpResponseCode = https.GET();
+      if(httpResponseCode == 200)
       {
         Serial.println("Request sent!");
-        String response = http.getString();
+        String response = https.getString();
         Serial.println(response);
         if(strstr(response.c_str(), "false") != NULL)
         {
@@ -417,24 +423,32 @@ void sendRequest(char* url, char* requestType, char* content)
       Serial.println("Error on sending request: ");
       Serial.print(requestType);
     }
+    https.end();
   }
 }
-/* Send HTTP request
-    Send a POST request to the specified URL
-*/
-void sendRequest(char* url, char* requestType, char* content, char* response, char* data) {
+
+void httpsRequest(char* url, char* requestType, char* content, char* data) {
   Serial.println("Sending request...");
-  if (WiFi.status() == WL_CONNECTED) {
-    HTTPClient http;
-    http.begin(url);
-    http.addHeader("Content-Type", content);
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    char* certificate;
+    WiFiClientSecure *client = new WiFiClientSecure;
+    client->setCACert(certificate);
+    client->setInsecure();
+    HTTPClient https;
+    https.begin(*client, url);
+    https.addHeader("Content-Type", content);
+    https.addHeader("Host","192.168.1.146");
+    https.addHeader("Content-Length","24");
+    Serial.println(data);
     if (requestType == "POST")
     {
-      int httpResponseCode = http.POST(data);
-      if (httpResponseCode == 200)
+      int httpResponseCode = https.POST(data);
+      Serial.println(httpResponseCode);
+      if(httpResponseCode == 200)
       {
         Serial.println("Request sent!");
-        String response = http.getString();
+        String response = https.getString();
         Serial.println(response);
       }
       else
@@ -447,7 +461,6 @@ void sendRequest(char* url, char* requestType, char* content, char* response, ch
       Serial.println("Error on sending request: ");
       Serial.print(requestType);
     }
+    https.end();
   }
 }
-
-
