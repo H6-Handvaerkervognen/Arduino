@@ -136,6 +136,7 @@ void readButton(int button)
     else if(button == BUTTON_BLACK)
     {
       Serial.println("Black button pressed");
+      httpsRequest("https://192.168.1.11/Alarm/DeleteParring?alarmId=1", "DELETE", "application/json");
       ESP.restart();
     }
   }
@@ -418,6 +419,20 @@ void httpsRequest(char* url, char* requestType, char* content) {
       else
       {
         Serial.println("Error on sending GET: " + httpResponseCode);
+      }
+    }
+    else if(requestType == "DELETE")
+    {
+      int httpResponseCode = https.sendRequest(requestType);
+      if(httpResponseCode == 200)
+      {
+        Serial.println("Request sent!");
+        String response = https.getString();
+        Serial.println(response);
+      }
+      else
+      {
+        Serial.println("Error on sending DELETE: " + httpResponseCode);
       }
     }
     else
