@@ -76,6 +76,10 @@ void setup() {
   SerialBT.begin("VAN ALARM");
   connectToWiFi();
   configTime(3600, 3600, "pool.ntp.org", "time.nist.gov");
+
+
+  
+  Serial.println("GET");
   httpsRequest("https://192.168.1.11/Alarm/GetAlarmInfo?alarmId=1", "GET", "application/json");
 }
 
@@ -95,13 +99,8 @@ void loop() {
           bluetoothReceive();
         }
       }
-
       break;
     case ALARM:
-      digitalWrite(PIN_RED_LED, HIGH);
-      digitalWrite(PIN_BLUE_LED, LOW);
-      digitalWrite(PIN_GREEN_LED, LOW);
-      digitalWrite(PIN_YELLOW_LED, LOW);
       detectionTimerRange();
       break;
     case PAIRING:
@@ -290,13 +289,7 @@ void detectionTimerRange() {
         threadCreated = true;
         buzzer(18000);
       }
-
       currentState = PAIRING;
-      digitalWrite(PIN_GREEN_LED, LOW);
-      digitalWrite(PIN_BLUE_LED, LOW);
-      digitalWrite(PIN_RED_LED, HIGH);
-      digitalWrite(PIN_YELLOW_LED, LOW);
-    }
   }
 }
 
@@ -305,6 +298,7 @@ void detectionTimerRange() {
     If the alarm is turned off, stop the thread
 */
 void sendHttpRequest(void * parameter) {
+  Serial.println("Thread 2");
   int duration_s = 180;
   for (size_t i = 0; i < duration_s; i++)
   {
@@ -328,6 +322,7 @@ void sendHttpRequest(void * parameter) {
 */
 void rcRead(void * parameter)
 {
+  Serial.println("Thread 3");
   RCSwitch mySwitch = RCSwitch();
   mySwitch.enableReceive(RC_SWITCH_PIN);
   int duration_s = 180;
@@ -351,8 +346,6 @@ void rcRead(void * parameter)
     }
     vTaskDelay(1000);
   }
-
-
 }
 
 /* Send HTTPS request
@@ -396,8 +389,6 @@ void httpsRequest(char* url, char* requestType, char* content) {
           }
           const char* startTime = doc["startTime"];
           const char* endTime = doc["endTime"];
-          Serial.println(startTime);
-          Serial.println(endTime);
 
           char* startHourChar = strtok((char*)startTime, ":");
           char* startMinuteChar = strtok(NULL, ":");
@@ -408,12 +399,6 @@ void httpsRequest(char* url, char* requestType, char* content) {
           startMinute = atoi(startMinuteChar);
           endHour = atoi(endHourChar);
           endMinute = atoi(endMinuteChar);
-
-          Serial.println(startHour);
-          Serial.println(startMinute);
-          Serial.println(endHour);
-          Serial.println(endMinute);
-          
         }
       }
       else
@@ -432,7 +417,8 @@ void httpsRequest(char* url, char* requestType, char* content) {
       }
       else
       {
-        Serial.println("Error on sending DELETE: " + httpResponseCode);
+        Serial.println("Error on sending DELETE:");
+        Serial.print(httpResponseCode);
       }
     }
     else
@@ -441,6 +427,7 @@ void httpsRequest(char* url, char* requestType, char* content) {
       Serial.print(requestType);
     }
     https.end();
+    Serial.println("Request ended!");
   }
 }
 
@@ -468,7 +455,8 @@ void httpsRequest(char* url, char* requestType, char* content, char* data) {
       }
       else
       {
-        Serial.println("Error on sending POST: " + httpResponseCode);
+        Serial.println("Error on sending POST:");
+        Serial.print(httpResponseCode);
       }
     }
     else
@@ -477,5 +465,6 @@ void httpsRequest(char* url, char* requestType, char* content, char* data) {
       Serial.print(requestType);
     }
     https.end();
+    Serial.println("Request ended!");
   }
 }
