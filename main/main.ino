@@ -137,7 +137,7 @@ void readButton(int button)
     else if(button == BUTTON_BLACK)
     {
       Serial.println("Black button pressed");
-      httpsRequest("https://192.168.1.11/Alarm/DeleteParring?alarmId=1", "DELETE", "application/json");
+      httpsRequest("https://192.168.1.11/Alarm/DeletePairing?alarmID=1", "DELETE", "application/json");
       ESP.restart();
     }
   }
@@ -307,7 +307,7 @@ void sendHttpRequest(void * parameter) {
       vTaskDelete(NULL);
     }
     Serial.println("Time left: " + String(duration_s - i));
-    httpsRequest("https://192.168.1.11/Alarm/AlarmStatus?alarmId=1", "GET", "application/json");
+    httpsRequest("https://192.168.1.11/Alarm/GetStatus?alarmID=1", "GET", "application/json");
     vTaskDelay(1000);
   }
   Serial.println("Task done!");
