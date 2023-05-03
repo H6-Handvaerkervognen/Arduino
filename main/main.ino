@@ -33,6 +33,8 @@ enum State {
 };
 
 BluetoothSerial SerialBT;
+WiFiClientSecure client;
+HTTPClient https;
 int currentState = IDLE;
 int timer = 0;
 const int seconds = 5;
@@ -365,11 +367,9 @@ void httpsRequest(char* url, char* requestType, char* content) {
   if (WiFi.status() == WL_CONNECTED)
   {
     char* certificate;
-    WiFiClientSecure *client = new WiFiClientSecure;
-    client->setCACert(certificate);
-    client->setInsecure();
-    HTTPClient https;
-    https.begin(*client, url);
+    client.setCACert(certificate);
+    client.setInsecure();
+    https.begin(client, url);
     https.addHeader("Content-Type", content);
     if (requestType == "GET")
     {
@@ -449,11 +449,9 @@ void httpsRequest(char* url, char* requestType, char* content, char* data) {
   if (WiFi.status() == WL_CONNECTED)
   {
     char* certificate;
-    WiFiClientSecure *client = new WiFiClientSecure;
-    client->setCACert(certificate);
-    client->setInsecure();
-    HTTPClient https;
-    https.begin(*client, url);
+    client.setCACert(certificate);
+    client.setInsecure();
+    https.begin(client, url);
     https.addHeader("Content-Type", content);
     https.addHeader("Host","192.168.1.146");
     https.addHeader("Content-Length","24");
