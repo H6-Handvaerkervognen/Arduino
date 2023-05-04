@@ -77,8 +77,6 @@ void setup() {
   connectToWiFi();
   configTime(3600, 3600, "pool.ntp.org", "time.nist.gov");
 
-
-  
   Serial.println("GET");
   httpsRequest("https://192.168.1.11/Alarm/GetAlarmInfo?alarmId=1", "GET", "application/json");
 }
@@ -112,7 +110,10 @@ void loop() {
       {
         readButton(BUTTON_BLUE);
         readButton(BUTTON_BLACK);
-        detectVibration();
+        if(alarmOn == false)
+        {
+          detectVibration();
+        }  
       }
       break;
   }
@@ -446,7 +447,6 @@ void httpsRequest(char* url, char* requestType, char* content, char* data) {
     https.addHeader("Content-Type", content);
     https.addHeader("Host","192.168.1.146");
     https.addHeader("Content-Length","24");
-    Serial.println(data);
     if (requestType == "POST")
     {
       int httpResponseCode = https.POST(data);
