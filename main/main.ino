@@ -1,5 +1,5 @@
 #include <BluetoothSerial.h>
-#include <ArduinoJson.h>  //6.21.0
+#include <ArduinoJson.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <RCSwitch.h>
@@ -60,7 +60,9 @@ int noteDurations[] = {
 
 struct tm timeinfo;
 
+/* Setup serial, pins, bluetooth, wifi and timet
 
+*/
 void setup() {
   Serial.begin(115200);
   pinMode(PIN_VIBRATION, INPUT);
@@ -80,7 +82,11 @@ void setup() {
   Serial.println("GET");
   httpsRequest("https://192.168.1.11/Alarm/GetAlarmInfo?alarmId=1", "GET", "application/json");
 }
-
+/* loop 
+    Connect to WiFi
+    Get Local Time
+    Switch state 
+*/
 void loop() {
   connectToWiFi();
   getLocalTimeInfo();
@@ -120,7 +126,7 @@ void loop() {
 }
 
 /* Read button state
-    Read the button state
+    Read the button state if alarm is off 
     If the blue button is pressed, change state to IDLE
     If the black button is pressed, restart the device to factory settings
 */
@@ -265,10 +271,10 @@ void getLocalTimeInfo() {
 }
 /* Detection timer range
     Check if the current time is within the timer range
-    If it is, start the alarm sound and send a http request
+    If it is, start the alarm sound and send a https request
     Create 2 threads
-    thred 1 for sending http request
-    thread 2 for reading the RC switch
+    thread 1 for sending https request
+    thread 2 for reading the RC switch - Remote controller 
 */
 void detectionTimerRange() {
   if ((currentHour > startHour || (currentHour == startHour && currentMinute >= startMinute))
@@ -358,6 +364,8 @@ void rcRead(void * parameter)
     Send a GET request to the specified URL
     If the response contains "false", turn off the alarm
     If the response contains "timeStart" and "timeEnd", set the timer range
+    Send a DELETE request to the specified URL
+    To delete the pairing between alarm and client device
 
 */
 void httpsRequest(char* url, char* requestType, char* content) {
@@ -436,7 +444,9 @@ void httpsRequest(char* url, char* requestType, char* content) {
     Serial.println("Request ended!");
   }
 }
-
+/* Send HTTPS request
+    Send a POST request to the specified URL
+*/
 void httpsRequest(char* url, char* requestType, char* content, char* data) {
   Serial.println("Sending request...");
   if (WiFi.status() == WL_CONNECTED)
