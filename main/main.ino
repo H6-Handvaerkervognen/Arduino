@@ -284,8 +284,12 @@ void detectionTimerRange() {
 
 
       if (!threadCreated) {
-        xTaskCreatePinnedToCore(sendHttpRequest, "sendHttpRequest", 10000, NULL, 1, NULL, 0);
-        xTaskCreatePinnedToCore(rcRead, "rcRead", 10000, NULL, 1, NULL, 0);
+        threadCreated = false;
+        Serial.println("Creating thread");
+        int err = xTaskCreatePinnedToCore(sendHttpRequest, "sendHttpRequest", 3072, NULL, 1, NULL, 1);
+        Serial.println(err);
+        int err2 = xTaskCreatePinnedToCore(rcRead, "rcRead", 2048, NULL, 1, NULL, 1);
+        Serial.println(err2);
         threadCreated = true;
         buzzer(18000);
       }
