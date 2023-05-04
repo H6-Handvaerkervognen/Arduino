@@ -245,9 +245,9 @@ void buzzer(int duration_ms) {
   while (millis() - start_time < duration_ms) {
     for (int i = 0; i < 8; i++) {
       int noteDuration = 1000 / noteDurations[i];
-      //ledcWriteTone(TONE_PWM_CHANNEL, melody[i]);
+      ledcWriteTone(TONE_PWM_CHANNEL, melody[i]);
       delay(noteDuration);
-      //ledcWriteTone(TONE_PWM_CHANNEL, 0);
+      ledcWriteTone(TONE_PWM_CHANNEL, 0);
       delay(noteDuration);
     }
     if (alarmOn == false) {
@@ -298,7 +298,7 @@ void detectionTimerRange() {
       int err2 = xTaskCreatePinnedToCore(rcRead, "rcRead", 2048, NULL, 1, NULL, 1);
       Serial.println(err2);
       threadCreated = true;
-      //buzzer(18000);
+      buzzer(18000);
       Serial.println("TEST");
     }
     currentState = PAIRING;
