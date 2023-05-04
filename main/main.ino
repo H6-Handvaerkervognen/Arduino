@@ -16,8 +16,8 @@
 
 #define RC_SWITCH_PIN 16
 
-#define BUTTON_BLUE 22 
-#define BUTTON_BLACK 19 
+#define BUTTON_BLUE 22
+#define BUTTON_BLACK 19
 
 #define TONE_OUTPUT_PIN  21
 const int TONE_PWM_CHANNEL = 0;
@@ -110,10 +110,10 @@ void loop() {
       {
         readButton(BUTTON_BLUE);
         readButton(BUTTON_BLACK);
-        if(alarmOn == false)
+        if (alarmOn == false)
         {
           detectVibration();
-        }  
+        }
       }
       break;
   }
@@ -129,13 +129,13 @@ void readButton(int button)
   int buttonState = digitalRead(button);
   if (buttonState == 0 && alarmOn == false)
   {
-    if(button == BUTTON_BLUE)
+    if (button == BUTTON_BLUE)
     {
       Serial.println("Blue button pressed");
       currentState = IDLE;
       devicePaired = false;
     }
-    else if(button == BUTTON_BLACK)
+    else if (button == BUTTON_BLACK)
     {
       Serial.println("Black button pressed");
       httpsRequest("https://192.168.1.11/Alarm/DeletePairing?alarmID=1", "DELETE", "application/json");
@@ -272,29 +272,30 @@ void getLocalTimeInfo() {
 */
 void detectionTimerRange() {
   if ((currentHour > startHour || (currentHour == startHour && currentMinute >= startMinute))
-    && ((currentHour < endHour || (currentHour == endHour && currentMinute <= endMinute)) || (endHour < startHour && (currentHour < endHour || currentHour == endHour && currentMinute <= endMinute)))
-    || (currentHour == endHour && currentMinute <= endMinute && endHour >= startHour)
-    || (currentHour == startHour && currentMinute >= startMinute && endHour >= startHour)) {
-      Serial.println("############## ALARM!!! ##############");
-      alarmOn = true;
-      httpsRequest("https://192.168.1.11/Alarm/ActivateAlarm", "POST", "application/json","{\"alarmID\": \"1\"}");
-      digitalWrite(PIN_YELLOW_LED, HIGH);
-      digitalWrite(PIN_RED_LED, LOW);
-      digitalWrite(PIN_BLUE_LED, LOW);
-      digitalWrite(PIN_GREEN_LED, LOW);
+      && ((currentHour < endHour || (currentHour == endHour && currentMinute <= endMinute)) || (endHour < startHour && (currentHour < endHour || currentHour == endHour && currentMinute <= endMinute)))
+      || (currentHour == endHour && currentMinute <= endMinute && endHour >= startHour)
+      || (currentHour == startHour && currentMinute >= startMinute && endHour >= startHour)) {
+    Serial.println("############## ALARM!!! ##############");
+    alarmOn = true;
+    httpsRequest("https://192.168.1.11/Alarm/ActivateAlarm", "POST", "application/json", "{\"alarmID\": \"1\"}");
+    digitalWrite(PIN_YELLOW_LED, HIGH);
+    digitalWrite(PIN_RED_LED, LOW);
+    digitalWrite(PIN_BLUE_LED, LOW);
+    digitalWrite(PIN_GREEN_LED, LOW);
 
 
-      if (!threadCreated) {
-        threadCreated = false;
-        Serial.println("Creating thread");
-        int err = xTaskCreatePinnedToCore(sendHttpRequest, "sendHttpRequest", 3072, NULL, 1, NULL, 1);
-        Serial.println(err);
-        int err2 = xTaskCreatePinnedToCore(rcRead, "rcRead", 2048, NULL, 1, NULL, 1);
-        Serial.println(err2);
-        threadCreated = true;
-        buzzer(18000);
-      }
-      currentState = PAIRING;
+    if (!threadCreated) {
+      threadCreated = false;
+      Serial.println("Creating thread");
+      int err = xTaskCreatePinnedToCore(sendHttpRequest, "sendHttpRequest", 3072, NULL, 1, NULL, 1);
+      Serial.println(err);
+      int err2 = xTaskCreatePinnedToCore(rcRead, "rcRead", 2048, NULL, 1, NULL, 1);
+      Serial.println(err2);
+      threadCreated = true;
+      //buzzer(18000);
+      Serial.println("TEST");
+    }
+    currentState = PAIRING;
   }
 }
 
@@ -372,17 +373,17 @@ void httpsRequest(char* url, char* requestType, char* content) {
     if (requestType == "GET")
     {
       int httpResponseCode = https.GET();
-      if(httpResponseCode == 200)
+      if (httpResponseCode == 200)
       {
         Serial.println("Request sent!");
         String response = https.getString();
         Serial.println(response);
-        if(strstr(response.c_str(), "false") != NULL)
+        if (strstr(response.c_str(), "false") != NULL)
         {
           Serial.println("Alarm is off!");
           alarmOn = false;
         }
-        else if(strstr(response.c_str(), "startTime") != NULL && strstr(response.c_str(), "endTime") != NULL)
+        else if (strstr(response.c_str(), "startTime") != NULL && strstr(response.c_str(), "endTime") != NULL)
         {
 
           StaticJsonDocument<200> doc;
@@ -411,10 +412,10 @@ void httpsRequest(char* url, char* requestType, char* content) {
         Serial.println("Error on sending GET: " + httpResponseCode);
       }
     }
-    else if(requestType == "DELETE")
+    else if (requestType == "DELETE")
     {
       int httpResponseCode = https.sendRequest(requestType);
-      if(httpResponseCode == 200)
+      if (httpResponseCode == 200)
       {
         Serial.println("Request sent!");
         String response = https.getString();
@@ -445,13 +446,13 @@ void httpsRequest(char* url, char* requestType, char* content, char* data) {
     client.setInsecure();
     https.begin(client, url);
     https.addHeader("Content-Type", content);
-    https.addHeader("Host","192.168.1.146");
-    https.addHeader("Content-Length","24");
+    https.addHeader("Host", "192.168.1.146");
+    https.addHeader("Content-Length", "24");
     if (requestType == "POST")
     {
       int httpResponseCode = https.POST(data);
       Serial.println(httpResponseCode);
-      if(httpResponseCode == 200)
+      if (httpResponseCode == 200)
       {
         Serial.println("Request sent!");
         String response = https.getString();
